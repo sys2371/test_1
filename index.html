@@ -3,9 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Fullscreen Canvas Drawing</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      canvas {
+        border: 1px solid black;
+      }
+    </style>
   </head>
   <body>
-    <h1>hello yongsun</h1>
+    <canvas id="myCanvas"></canvas>
+    <script src="script.js"></script>
   </body>
 </html>
