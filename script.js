@@ -10,46 +10,62 @@ window.onload = function () {
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
-  let lastX, lastY, lastTime;
+  let lastX = null;
+  let lastY = null;
+  let lastTime = null;
 
-  canvas.addEventListener('mousemove', draw);
+  // Generate a random RGB color
+  function getRandomColor() {
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  let color = getRandomColor(); // Initialize with a random color
 
   function draw(e) {
     const currentTime = new Date().getTime();
     const currentX = e.offsetX;
     const currentY = e.offsetY;
 
-    if (lastX !== undefined && lastY !== undefined && lastTime !== undefined) {
+    if (lastX !== null && lastY !== null && lastTime !== null) {
       const dx = currentX - lastX;
       const dy = currentY - lastY;
       const distance = Math.sqrt(dx * dx + dy * dy);
       const timeElapsed = currentTime - lastTime;
       const speed = distance / timeElapsed;
 
+      const minLineWidth = 1;
+      const maxLineWidth = 10;
+      const minRadius = 5;
+      const maxRadius = 50;
+
       if (speed > 0.1) {
-        // 속도가 0.1 이상일 때 선 그리기
-        const minLineWidth = 1; // 선의 최소 두께
-        const maxLineWidth = 5; // 선의 최대 두께
-        const lineWidth = maxLineWidth - speed * (maxLineWidth - minLineWidth); // 속도가 빠를수록 얇은 선
+        const lineWidth = Math.max(
+          minLineWidth,
+          Math.min(
+            maxLineWidth,
+            maxLineWidth - speed * (maxLineWidth - minLineWidth)
+          )
+        );
 
         ctx.beginPath();
         ctx.moveTo(lastX, lastY);
         ctx.lineTo(currentX, currentY);
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = Math.max(
-          minLineWidth,
-          Math.min(maxLineWidth, lineWidth)
-        ); // 선의 두께를 설정
+        ctx.strokeStyle = color; // Use the current color
+        ctx.lineWidth = lineWidth;
+        ctx.lineJoin = 'round'; // Smooth line joins
+        ctx.lineCap = 'round'; // Smooth line ends
         ctx.stroke();
       } else {
-        // 속도가 0.1 이하일 때 원 그리기
-        const maxRadius = 600; // 원의 최대 반지름
-        const minRadius = 1; // 원의 최소 반지름
-        const radius = minRadius + speed * (maxRadius - minRadius); // 속도가 느릴수록 큰 원
+        const baseRadius = maxRadius * Math.exp(-speed * 10);
+        const radiusX = baseRadius * (1 + speed);
+        const radiusY = baseRadius / (1 + speed);
 
         ctx.beginPath();
-        ctx.arc(currentX, currentY, radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'black';
+        ctx.ellipse(currentX, currentY, radiusX, radiusY, 0, 0, Math.PI * 2);
+        ctx.fillStyle = color; // Use the current color
         ctx.fill();
       }
     }
@@ -58,4 +74,18 @@ window.onload = function () {
     lastY = currentY;
     lastTime = currentTime;
   }
+
+  function changeColor() {
+    color = getRandomColor(); // Update the color on click
+  }
+
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('click', changeColor); // Change color on click
+};
+
+const img = new Image();
+img.src = 'path/to/your/image.jpg'; // Update this path to your image file
+
+img.onload = function () {
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // Draw image to fit the canvas
 };
